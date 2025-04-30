@@ -20,7 +20,7 @@ def dlw(X: list[float], predicts: list[float], targets: list[float]) -> float:
 def dlb(predicts: list[float], targets: list[float]) -> float:
     assert len(predicts) == len(targets), "must have same dimension"
 
-    return sum([predict - target for x, predict, target in zip(X, predicts, targets)])/len(predicts)
+    return sum([predict - target for predict, target in zip(predicts, targets)])/len(predicts)
 
 
 def read_data(path: str) -> tuple[list[float], list[float]]:
@@ -47,7 +47,7 @@ def normalize(X: list[float], Y: list[float]) -> tuple[list[float], list[float],
     Y_norm = [(y - meany)/stdy for y in Y]
     return X_norm, Y_norm, meanx, meany, stdx, stdy
 
-def draw_line(min_x, max_x, w, b, step=0.01):
+def draw_line(min_x: float, max_x: float, w: float, b: float, step:float = 0.01) -> tuple[list[float], list[float]]:
     x_draw = [min_x]
     x_current = min_x
     while x_current < max_x:
@@ -57,7 +57,7 @@ def draw_line(min_x, max_x, w, b, step=0.01):
     y_draw = predict(w, b, x_draw)
     return x_draw, y_draw
 
-def denorm(predicts, meany, stdy):
+def denorm(predicts: list[float], meany: float, stdy: float) -> list[float]:
     return [predict * stdy + meany for predict in predicts]
 
 if __name__ == "__main__":
@@ -67,10 +67,67 @@ if __name__ == "__main__":
     print(f"meanx: {meanx}, stdx: {stdx}")
     print(f"meany: {meany}, stdy: {stdy}")
 
+
+
+    # ---------------- NO NORM -------------------
     w = 0.1
     b = -0.1
+
     epochs = 100
     lr = 0.1
+    losses = []
+    for i in range(epochs):
+        predicts = predict(w, b, X)
+        losses.append(loss(predicts, Y))
+        dw = dlw(X_norm, predicts, Y)
+        db = dlb(predicts, Y)
+
+        w = w - lr*dw
+        b = b - lr*db
+
+
+    plt.plot(losses)
+    plt.savefig("loss_train_no_norm_0.1lr.jpg")
+    plt.clf()
+
+    plt.scatter(X, Y)
+    x_draw, y_draw = draw_line(min(X), max(X), w, b)
+    plt.plot(x_draw, y_draw)
+    plt.savefig("output_train_no_norm_0.1lr.jpg")
+    plt.clf()
+
+    w = 0.1
+    b = -0.1
+
+    epochs = 10000
+    lr = 0.0005
+    losses = []
+    for i in range(epochs):
+        predicts = predict(w, b, X)
+        losses.append(loss(predicts, Y))
+        dw = dlw(X_norm, predicts, Y)
+        db = dlb(predicts, Y)
+
+        w = w - lr*dw
+        b = b - lr*db
+    epochs = 100
+
+
+    plt.plot(losses)
+    plt.savefig("loss_train_no_norm_0.0005lr.jpg")
+    plt.clf()
+
+    plt.scatter(X, Y)
+    x_draw, y_draw = draw_line(min(X), max(X), w, b)
+    plt.plot(x_draw, y_draw)
+    plt.savefig("output_train_no_norm_0.0005lr.jpg")
+    plt.clf()
+
+    # ---------------- WITH NORM -------------------
+    w = 0.1
+    b = -0.1
+    lr = 0.1
+    epochs = 100
     losses = []
     for i in range(epochs):
         predicts = predict(w, b, X_norm)

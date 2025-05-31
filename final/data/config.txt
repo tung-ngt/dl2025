@@ -15,4 +15,4 @@ ReLU
 Linear,84,10
 Softmax
 ####################
-SGD,0.5
+SGD,0.9
